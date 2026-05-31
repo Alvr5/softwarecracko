@@ -36,7 +36,7 @@
     padding: 12px 24px;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    z-index: 9999;
+    z-index: 10000;
     display: flex;
     align-items: center;
     gap: 16px;
@@ -58,6 +58,24 @@
     font-weight: 700;
   }
   .update-notification .btn-refresh:hover { background: #dc2626; }
+
+  /* --- PANTALLA DE BLOQUEO TOTAL --- */
+  .app-blocker {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 10, 12, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none;
+    cursor: not-allowed;
+  }
+  .app-blocker.active {
+    display: block;
+  }
 
   /* PANEL LATERAL DE CONTROL */
   .panel {
@@ -280,9 +298,11 @@
 </head>
 <body>
 
+  <div id="appBlocker" class="app-blocker"></div>
+
   <div id="updateBanner" class="update-notification">
-    <span>⚠️ <b>¡Nueva actualización disponible!</b> Se han detectado cambios en el repositorio.</span>
-    <button class="btn-refresh" onclick="forzarActualizacionExe()">Actualizar App</button>
+    <span>⚠️ <b>Versión desactualizada:</b> Debes descargar la nueva versión <b id="versionLabel"></b> para continuar usando la app.</span>
+    <button class="btn-refresh" onclick="irADescarga()">Descargar</button>
   </div>
 
   <div class="panel">
@@ -370,7 +390,6 @@
       </div>
       <div class="control-group">
         <label for="imageSize">Tamaño del Logo</label>
-        <label for="imageSize">Tamaño del Logo</label>
         <input type="range" id="imageSize" min="50" max="500" value="250">
       </div>
     </div>
@@ -436,6 +455,7 @@
   const imageSize = document.getElementById('imageSize');
 
   let streamActive = null;
+  let AppBloqueada = false;
 
   const shapesData = {
     rombo: "M 640,160 L 840,360 L 640,560 L 440,360 Z",
@@ -446,6 +466,7 @@
   };
 
   function updateShape() {
+    if (AppBloqueada) return;
     const pathValue = shapesData[shapeSelect.value];
     dynamicShape.setAttribute('d', pathValue);
     clipPathShape.setAttribute('d', pathValue);
@@ -457,6 +478,7 @@
     let startX, startY, initialLeft, initialTop;
 
     element.addEventListener('pointerdown', (e) => {
+      if (AppBloqueada) return;
       isDragging = true;
       startX = e.clientX;
       startY = e.clientY;
@@ -467,7 +489,7 @@
     });
 
     element.addEventListener('pointermove', (e) => {
-      if (!isDragging) return;
+      if (!isDragging || AppBloqueada) return;
       let newLeft = initialLeft + (e.clientX - startX);
       let newTop = initialTop + (e.clientY - startY);
       element.style.left = `${newLeft}px`;
@@ -484,19 +506,24 @@
   makeElementDraggable(layerImage);
 
   textInput.addEventListener('input', () => {
+    if (AppBloqueada) return;
     layerText.textContent = textInput.value || '';
   });
   fontSelect.addEventListener('change', () => {
+    if (AppBloqueada) return;
     layerText.className = `draggable-layer ${fontSelect.value}`;
   });
   textColorPicker.addEventListener('input', (e) => {
+    if (AppBloqueada) return;
     layerText.style.color = e.target.value;
   });
   textSize.addEventListener('input', (e) => {
+    if (AppBloqueada) return;
     layerText.style.fontSize = `${e.target.value}px`;
   });
 
   showTextBg.addEventListener('change', () => {
+    if (AppBloqueada) return;
     if (showTextBg.checked) {
       layerText.style.backgroundColor = textBgColorPicker.value;
       layerText.style.padding = "8px 24px";
@@ -511,16 +538,19 @@
   });
 
   textBgColorPicker.addEventListener('input', (e) => {
+    if (AppBloqueada) return;
     if (showTextBg.checked) {
       layerText.style.backgroundColor = e.target.value;
     }
   });
 
   textBgRadius.addEventListener('input', (e) => {
+    if (AppBloqueada) return;
     layerText.style.borderRadius = `${e.target.value}px`;
   });
 
   imageLoader.addEventListener('change', (e) => {
+    if (AppBloqueada) return;
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -532,18 +562,22 @@
     }
   });
   imageSize.addEventListener('input', (e) => {
+    if (AppBloqueada) return;
     layerImage.style.width = `${e.target.value}px`;
   });
 
   colorPicker.addEventListener('input', (e) => {
+    if (AppBloqueada) return;
     colorHex.textContent = e.target.value.toUpperCase();
     dynamicShape.setAttribute('stroke', e.target.value);
   });
   fillOpacity.addEventListener('input', (e) => {
+    if (AppBloqueada) return;
     dynamicShape.setAttribute('fill-opacity', e.target.value / 100);
   });
 
   async function toggleCamera() {
+    if (AppBloqueada) return;
     if (streamActive) {
       streamActive.getTracks().forEach(track => track.stop());
       videoElement.style.display = 'none';
@@ -568,6 +602,8 @@
   updateShape();
 
   function exportOverlay() {
+    if (AppBloqueada) return; 
+    
     const videoState = videoElement.style.display;
     videoElement.style.display = 'none';
     document.body.style.cursor = 'wait';
@@ -592,36 +628,43 @@
     });
   }
 
-  const GITHUB_USER = "Alvr5";
-  const GITHUB_REPO = "softwarecracko"; 
-  
-  const LOCAL_COMMIT_SHA = "54686cb"; 
+  // --- 📆 CONTROL DE VERSIONES MANUAL (SISTEMA SEGURO) ---
 
-  async function checkUpdates() {
-    const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/commits/main`;
-    
-    try {
-      const response = await fetch(url);
-      if (!response.ok) return; 
-      
-      const data = await response.json();
-      const remoteCommitSha = data.sha; 
+  // 1. La versión física de este archivo actual.
+  const MI_VERSION_ACTUAL = "1.0.0"; 
 
-      // El banner solo bajará si el SHA remoto no coincide con tu LOCAL_COMMIT_SHA
-      if (remoteCommitSha && !remoteCommitSha.startsWith(LOCAL_COMMIT_SHA)) {
-        document.getElementById('updateBanner').classList.add('show');
-      }
-    } catch (error) {
-      console.log("No se pudo verificar las actualizaciones:", error);
+  // 2. La versión mínima que pides para trabajar. 
+  const VERSION_REQUERIDA = "1.1.0"; 
+
+  // 3. Fecha límite en la que se activará el control (Formato: "AÑO-MES-DÍA T HORA:MINUTOS:SEGUNDOS")
+  const FECHA_ACTUALIZACION = "2026-05-31T12:00:00"; 
+
+  function comprobarFechaActualizacion() {
+    const ahora = new Date();
+    const fechaLimite = new Date(FECHA_ACTUALIZACION);
+
+    // Muestra visualmente la versión exigida en el banner de forma correcta
+    document.getElementById('versionLabel').textContent = `${VERSION_REQUERIDA}`;
+
+    // Si ya pasó la fecha programada Y este archivo tiene una versión inferior a la requerida:
+    if (ahora >= fechaLimite && MI_VERSION_ACTUAL !== VERSION_REQUERIDA) {
+      AppBloqueada = true; 
+      document.getElementById('updateBanner').classList.add('show'); 
+      document.getElementById('appBlocker').classList.add('active'); 
+    } else {
+      // Si el usuario ya está usando el archivo nuevo o aún no es la fecha, todo sigue desbloqueado y oculto
+      AppBloqueada = false;
+      document.getElementById('updateBanner').classList.remove('show');
+      document.getElementById('appBlocker').classList.remove('active');
     }
   }
 
-  function forzarActualizacionExe() {
-    window.location.href = window.location.pathname + '?update=' + Date.now();
+  function irADescarga() {
+    window.open('https://drive.google.com/drive/folders/1twMwSrzrgG3zBUtB0J5sguOvKgW-U27z?usp=sharing', '_blank');
   }
 
-  // Iniciar comprobación inteligente
-  checkUpdates();
+  comprobarFechaActualizacion();
+  setInterval(comprobarFechaActualizacion, 20000); // Monitoreo silencioso cada 20 segundos
 </script>
 
 </body>
