@@ -21,7 +21,43 @@
     display: flex;
     height: 100vh;
     overflow: hidden;
+    position: relative; /* Necesario para la notificación flotante */
   }
+
+  /* --- NUEVA NOTIFICACIÓN DE ACTUALIZACIÓN --- */
+  .update-notification {
+    position: fixed;
+    top: -100px; /* Escondida por defecto */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #7f1d1d;
+    border: 1px solid #f87171;
+    color: #fca5a5;
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .update-notification.show {
+    top: 20px; /* Aparece bajando suavemente */
+  }
+  .update-notification b { color: #fff; }
+  .update-notification .btn-refresh {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .update-notification .btn-refresh:hover { background: #dc2626; }
 
   /* PANEL LATERAL DE CONTROL */
   .panel {
@@ -227,7 +263,6 @@
     color: #ffffff;
     font-size: 36px;
     font-weight: 800;
-    /* Estilos iniciales del fondo de la etiqueta */
     background-color: rgba(0, 0, 0, 0.6); 
     padding: 8px 24px;
     border-radius: 6px;
@@ -256,6 +291,11 @@
 </style>
 </head>
 <body>
+
+  <div id="updateBanner" class="update-notification">
+    <span>⚠️ <b>¡Nueva actualización disponible!</b> Se han detectado cambios en el repositorio.</span>
+    <button class="btn-refresh" onclick="location.reload()">Recargar Página</button>
+  </div>
 
   <div class="panel">
     <div class="panel-body">
@@ -342,6 +382,7 @@
       </div>
       <div class="control-group">
         <label for="imageSize">Tamaño del Logo</label>
+        <label for="imageSize">Tamaño del Logo</label>
         <input type="range" id="imageSize" min="50" max="500" value="250">
       </div>
     </div>
@@ -380,7 +421,6 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
-  // DOM Elements básicos
   const canvasContainer = document.getElementById('canvas-container');
   const dynamicShape = document.getElementById('dynamicShape');
   const clipPathShape = document.getElementById('clipPathShape');
@@ -391,20 +431,17 @@
   const colorHex = document.getElementById('colorHex');
   const fillOpacity = document.getElementById('fillOpacity');
 
-  // Text Elements & Inputs
   const layerText = document.getElementById('layer-text');
   const textInput = document.getElementById('textInput');
   const fontSelect = document.getElementById('fontSelect');
   const textColorPicker = document.getElementById('textColorPicker');
   const textSize = document.getElementById('textSize');
 
-  // NUEVOS: Inputs de control de fondo para texto
   const showTextBg = document.getElementById('showTextBg');
   const textBgColorPicker = document.getElementById('textBgColorPicker');
   const textBgRadius = document.getElementById('textBgRadius');
   const textBgControls = document.getElementById('textBgControls');
 
-  // Image Elements
   const layerImage = document.getElementById('layer-image');
   const imageLoader = document.getElementById('imageLoader');
   const loadedImg = document.getElementById('loaded-img');
@@ -427,7 +464,6 @@
   }
   shapeSelect.addEventListener('change', updateShape);
 
-  // --- MOTOR DE ARRASTRE (POINTER EVENTS) ---
   function makeElementDraggable(element) {
     let isDragging = false;
     let startX, startY, initialLeft, initialTop;
@@ -472,7 +508,6 @@
     layerText.style.fontSize = `${e.target.value}px`;
   });
 
-  // --- NUEVA LÓGICA: INTERRUPTOR Y ESTILO DE FONDO DE TEXTO ---
   showTextBg.addEventListener('change', () => {
     if (showTextBg.checked) {
       layerText.style.backgroundColor = textBgColorPicker.value;
@@ -568,6 +603,37 @@
       console.error(err);
     });
   }
+
+  // --- 🚀 CONFIGURACIÓN DEL SISTEMA DE ACTUALIZACIÓN AUTOMÁTICA ---
+  // Cambia estos valores por los tuyos reales en GitHub:
+  const GITHUB_USER = "Alvr5";
+  const GITHUB_REPO = "https://github.com/Alvr5/softwarecracko";
+  
+  // IMPORTANTE: Cada vez que hagas cambios y subas código, actualiza esta fecha 
+  // con la del momento exacto del push o el ID del último commit conocido localmente.
+  const LOCAL_VERSION_DATE = "2026-05-31T12:00:00Z"; 
+
+  async function checkUpdates() {
+    const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/commits/main`;
+    
+    try {
+      const response = await fetch(url);
+      if (!response.ok) return; // Si el repositorio es privado o falla la API, sale en silencio
+      
+      const data = await response.json();
+      const remoteCommitDate = data.commit.committer.date; // Fecha del último cambio en GitHub
+
+      // Si la fecha remota es más nueva que nuestra marca local, mostramos el aviso
+      if (new Date(remoteCommitDate) > new Date(LOCAL_VERSION_DATE)) {
+        document.getElementById('updateBanner').classList.add('show');
+      }
+    } catch (error) {
+      console.log("No se pudo verificar las actualizaciones:", error);
+    }
+  }
+
+  // Ejecutar comprobación al abrir la app
+  checkUpdates();
 </script>
 
 </body>
