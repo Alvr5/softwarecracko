@@ -1,0 +1,21 @@
+directories:
+  output: compilacion-nueva
+  buildResources: build
+appId: com.crackostudio.hub
+productName: Cracko Studio Hub
+win:
+  target: nsis
+  icon: logo.ico
+  cscLink: null
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Cracko Studio Hub
+files:
+  - filter:
+      - main.js
+      - package.json
+      - logo.ico
+electronVersion: 31.7.7
