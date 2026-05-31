@@ -301,7 +301,7 @@
   <div id="appBlocker" class="app-blocker"></div>
 
   <div id="updateBanner" class="update-notification">
-    <span>⚠️ <b>Versión desactualizada:</b> Debes descargar la nueva versión <b id="versionLabel"></b> para continuar usando la app.</span>
+    <span>⚠️ <b>Versión desactualizada: estás en la versión <b id="currentVersion"></b></b>. Debes descargar la nueva versión <b id="versionLabel"></b> para continuar usando la app.</span>
     <button class="btn-refresh" onclick="irADescarga()">Descargar</button>
   </div>
 
@@ -631,7 +631,7 @@
   // --- 📆 CONTROL DE VERSIONES MANUAL (SISTEMA SEGURO) ---
 
   // 1. La versión física de este archivo actual.
-  const MI_VERSION_ACTUAL = "1.0.0"; 
+  const MI_VERSION_ACTUAL = "1.1.0"; 
 
   // 2. La versión mínima que pides para trabajar. 
   const VERSION_REQUERIDA = "1.1.0"; 
@@ -643,8 +643,9 @@
     const ahora = new Date();
     const fechaLimite = new Date(FECHA_ACTUALIZACION);
 
-    // Muestra visualmente la versión exigida en el banner de forma correcta
-    document.getElementById('versionLabel').textContent = `${VERSION_REQUERIDA}`;
+    // Renderizado dinámico de variables en los ID correspondientes del Banner
+    document.getElementById('currentVersion').textContent = `v${MI_VERSION_ACTUAL}`;
+    document.getElementById('versionLabel').textContent = `v${VERSION_REQUERIDA}`;
 
     // Si ya pasó la fecha programada Y este archivo tiene una versión inferior a la requerida:
     if (ahora >= fechaLimite && MI_VERSION_ACTUAL !== VERSION_REQUERIDA) {
