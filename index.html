@@ -2,26 +2,66 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
+<link rel="icon" type="image/png" href="logo.ico" />
 <title>Cracko Hub</title>
 
 <style>
+  /* ==================================================
+     🎨 CONFIGURACIÓN DE VARIABLES (MODO OSCURO POR DEFECTO)
+     ================================================== */
   :root {
     --bg-main: #0a0a0c;
     --bg-panel: #121216;
     --bg-input: #1c1c24;
     --border-color: #2a2a35;
+    --text-main: #e4e4e7;
+    --text-muted: #94a3b8;
+    --text-title: linear-gradient(45deg, #fff, #888);
     --accent: #00ffff;
+    --btn-action-bg: #1e293b;
+    --btn-action-border: #334155;
+    --btn-action-text: #f8fafc;
+    --btn-action-hover: #334155;
+    --canvas-border: #3a3a4a;
+    --grid-opacity: rgba(255, 255, 255, 0.01);
+    --banner-bg: #1e293b;
+    --banner-text: #f8fafc;
+    --banner-border: #334155;
+  }
+
+  /* ==================================================
+     ☀️ VARIABLES PARA EL MODO CLARO
+     ================================================== */
+  body.light-mode {
+    --bg-main: #f4f4f5;
+    --bg-panel: #ffffff;
+    --bg-input: #f1f1f4;
+    --border-color: #e4e4e7;
+    --text-main: #18181b;
+    --text-muted: #71717a;
+    --text-title: linear-gradient(45deg, #18181b, #71717a);
+    --accent: #06b6d4; /* Un cian un poco más oscuro y legible en fondos claros */
+    --btn-action-bg: #e4e4e7;
+    --btn-action-border: #d4d4d8;
+    --btn-action-text: #18181b;
+    --btn-action-hover: #d4d4d8;
+    --canvas-border: #cbd5e1;
+    --grid-opacity: rgba(0, 0, 0, 0.03);
+    --banner-bg: #e4e4e7;
+    --banner-text: #18181b;
+    --banner-border: #cbd5e1;
   }
 
   body {
     margin: 0;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background: var(--bg-main);
-    color: #e4e4e7;
+    color: var(--text-main);
     display: flex;
     height: 100vh;
     overflow: hidden;
     position: relative; 
+    transition: background 0.3s, color 0.3s;
   }
 
   /* --- BANNER DE ADVERTENCIA Y CONTADOR --- */
@@ -30,13 +70,13 @@
     top: -120px; 
     left: 50%;
     transform: translateX(-50%);
-    background: #1e1b4b; /* Tono morado/azul oscuro para advertencia amigable */
+    background: #1e1b4b; 
     border: 1px solid #818cf8;
     color: #e0e7ff;
     padding: 14px 24px;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    z-index: 10000;
+    z-index: 10;
     display: flex;
     align-items: center;
     gap: 20px;
@@ -49,13 +89,12 @@
   }
   .update-notification b { color: #fff; }
   
-  /* Estilo del bloque del contador */
   .countdown-timer {
     background: #312e81;
     padding: 6px 12px;
     border-radius: 8px;
     font-family: 'Orbitron', monospace;
-    color: var(--accent);
+    color: #00ffff;
     font-weight: 700;
     letter-spacing: 1px;
     border: 1px solid rgba(0, 255, 255, 0.2);
@@ -83,17 +122,18 @@
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    z-index: 10;
+    z-index: 3;
     overflow-y: auto;
     height: 100vh;
     gap: 4px;
+    transition: background 0.3s, border-color 0.3s;
   }
 
   .panel-header h1 {
     font-size: 1.3rem;
     font-weight: 700;
     margin: 0 0 4px 0;
-    background: linear-gradient(45deg, #fff, #888);
+    background: var(--text-title);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -101,13 +141,14 @@
   .section-title {
     font-size: 0.75rem;
     font-weight: 700;
-    color: #64748b;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 12px;
     margin-top: 16px;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 6px;
+    transition: border-color 0.3s, color 0.3s;
   }
 
   .control-group {
@@ -134,19 +175,21 @@
 
   label {
     font-size: 0.8rem;
-    color: #94a3b8;
+    color: var(--text-muted);
+    transition: color 0.3s;
   }
 
   select, input[type="text"], input[type="range"] {
     width: 100%;
     background: var(--bg-input);
     border: 1px solid var(--border-color);
-    color: white;
+    color: var(--text-main);
     padding: 10px;
     border-radius: 8px;
     font-size: 0.85rem;
     outline: none;
     box-sizing: border-box;
+    transition: background 0.3s, border-color 0.3s, color 0.3s;
   }
 
   .color-picker-wrapper {
@@ -157,6 +200,7 @@
     border: 1px solid var(--border-color);
     padding: 6px 12px;
     border-radius: 8px;
+    transition: background 0.3s, border-color 0.3s;
   }
 
   input[type="color"] {
@@ -174,9 +218,9 @@
   }
 
   .btn-action {
-    background: #1e293b;
-    border: 1px solid #334155;
-    color: #f8fafc;
+    background: var(--btn-action-bg);
+    border: 1px solid var(--btn-action-border);
+    color: var(--btn-action-text);
     font-weight: 600;
     padding: 10px;
     border-radius: 8px;
@@ -185,8 +229,8 @@
     font-size: 0.85rem;
     text-align: center;
   }
-  .btn-action:hover { background: #334155; }
-  .btn-action.active { background: #059669; border-color: #10b981; }
+  .btn-action:hover { background: var(--btn-action-hover); }
+  .btn-action.active { background: #059669; border-color: #10b981; color: white; }
 
   .btn-export {
     background: var(--accent);
@@ -210,10 +254,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: radial-gradient(var(--bg-main) 40%, transparent 41%), linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+    background-image: radial-gradient(var(--bg-main) 40%, transparent 41%), linear-gradient(var(--grid-opacity) 1px, transparent 1px), linear-gradient(90deg, var(--grid-opacity) 1px, transparent 1px);
     background-size: 100% 100%, 20px 20px, 20px 20px;
     overflow: auto;
     padding: 40px;
+    transition: background 0.3s;
   }
 
   #canvas-container {
@@ -221,9 +266,10 @@
     height: 720px;
     background: transparent;
     position: relative;
-    border: 1px dashed #3a3a4a;
-    box-shadow: 0 20px 80px rgba(0,0,0,0.6);
+    border: 1px dashed var(--canvas-border);
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
     overflow: hidden;
+    transition: border-color 0.3s;
   }
 
   #canvas-svg {
@@ -287,6 +333,49 @@
     pointer-events: none;
   }
 
+  /* --- CONTROL DEL CAMBIADOR DE MODO --- */
+  .modoclaroyoscuro {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 9;
+  }
+
+  .btn-toggle-theme {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+  }
+  .btn-toggle-theme:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+  }
+
+  /* NOVEDADES BANNER */
+  .novedades_version {
+    position: absolute; 
+    z-index: 8; 
+    right: 20px; 
+    top: 80px; 
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2); 
+    background: var(--banner-bg); 
+    border: 1px solid var(--banner-border); 
+    color: var(--banner-text); 
+    font-weight: 600; 
+    padding: 16px; 
+    border-radius: 8px; 
+    width: 280px; 
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+  }
+
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Bebas+Neue&family=Inter:wght@400;700&display=swap');
   .f-inter { font-family: 'Inter', sans-serif; }
   .f-orbitron { font-family: 'Orbitron', sans-serif; }
@@ -295,12 +384,22 @@
 </head>
 <body>
 
-  <div id="updateBanner" class="update-notification" style=" background: rgb(0, 0, 0); border:red 2px solid; box-shadow: 0px 0px 10px red; width: max-content; text-align: center;">
+  <div class="novedades_version">
+    <div onclick="cerrarNovedades()" style="float: right; cursor: pointer; font-size: 11px; background: #ef4444; color: white; padding: 2px 7px; border-radius: 100%; font-weight: bold;">X</div>
+    <div style="clear: both; height: 5px;"></div>
+    <strong style="color: var(--text-main); font-size: 1.1rem;">Versión 1.2.0</strong>
+    <ul style="padding-left: 15px; margin-top: 10px;">
+      <h2 style="color: var(--text-muted); font-size: 0.9rem; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Novedades</h2>
+      <li style="margin-bottom: 5px;">✅ Diseño en modo claro y oscuro</li>
+    </ul>
+  </div>
+
+  <div id="updateBanner" class="update-notification" style="background: rgb(0, 0, 0); border: #ef4444 2px solid; box-shadow: 0px 0px 15px rgba(239, 68, 68, 0.4); width: max-content; text-align: center;">
     <span style="color: #fff; font-weight: 600;">
       🚀 ¡Nueva versión disponible! Estás en la <b><span id="currentVersion"></span></b>.
-      Pronto se exigirá la versión <b><span id="versionLabel"></span></b>.
+      Próxima versión: <b><span id="versionLabel"></span></b>.
     </span>
-    <div id="countdown" class="countdown-timer" style="background: transparent; color: rgb(255, 0, 0); border: none; font-size: 20px; font-weight: bold; font-family: 'Orbitron', sans-serif;">00d 00h 00m 00s</div>
+    <div id="countdown" class="countdown-timer" style="background: transparent; color: #ef4444; border: none; font-size: 20px; font-weight: bold;">00d 00h 00m 00s</div>
   </div>
 
   <div class="panel">
@@ -331,7 +430,7 @@
         <label>Color del Neón</label>
         <div class="color-picker-wrapper">
           <input type="color" id="colorPicker" value="#00ffff">
-          <span id="colorHex" style="font-size: 0.85rem; color: #888;">#00FFFF</span>
+          <span id="colorHex" style="font-size: 0.85rem; color: var(--text-muted);">#00FFFF</span>
         </div>
       </div>
       <div class="control-group">
@@ -365,7 +464,7 @@
 
       <div class="control-group checkbox-group">
         <input type="checkbox" id="showTextBg" checked>
-        <label for="showTextBg" style="color: #fff; font-weight: 600;">Activar Fondo del Nombre</label>
+        <label for="showTextBg" style="font-weight: 600;">Activar Fondo del Nombre</label>
       </div>
       
       <div id="textBgControls">
@@ -396,6 +495,11 @@
   </div>
 
   <div class="viewport">
+    
+    <div class="modoclaroyoscuro">
+      <button class="btn-toggle-theme" onclick="toggleTheme()">☀️ / 🌙 Cambiar Modo</button>
+    </div>
+
     <div id="canvas-container">
       <video id="webcam-video" autoplay playsinline muted></video>
 
@@ -426,6 +530,11 @@
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <script>
+  // Función para activar / desactivar el Modo Claro
+  function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+  }
+
   const canvasContainer = document.getElementById('canvas-container');
   const dynamicShape = document.getElementById('dynamicShape');
   const clipPathShape = document.getElementById('clipPathShape');
@@ -461,6 +570,13 @@
     circle: "M 640,360 m -170,0 a 170,170 0 1,0 340,0 a 170,170 0 1,0 -340,0",
     hexagon: "M 640,160 L 810,260 L 810,460 L 640,560 L 470,460 L 470,260 Z"
   };
+
+  function cerrarNovedades() {
+    const banner = document.querySelector('.novedades_version');
+    banner.style.opacity = '0';
+    banner.style.transform = 'translateY(-20px)';
+    setTimeout(() => banner.remove(), 500);
+  }
 
   function updateShape() {
     const pathValue = shapesData[shapeSelect.value];
@@ -609,15 +725,8 @@
     });
   }
 
-  // --- 📆 SISTEMA DE CUENTA REGRESIVA DE ACTUALIZACIÓN ---
-
-  // 1. La versión física de este archivo ejecutable actual.
-  const MI_VERSION_ACTUAL = "1.0.0"; 
-
-  // 2. La versión nueva que se está promocionando.
-  const VERSION_REQUERIDA = "1.1.0"; 
-
-  // 3. Fecha límite en la que terminará la cuenta atrás (Formato Estándar ISO: "AÑO-MES-DÍA T HORA:MINUTOS:SEGUNDOS")
+  const MI_VERSION_ACTUAL = "1.2.0"; 
+  const VERSION_REQUERIDA = "1.2.0"; 
   const FECHA_ACTUALIZACION = "2026-06-10T00:00:00"; 
 
   function actualizarContador() {
@@ -625,47 +734,29 @@
     const fechaLimite = new Date(FECHA_ACTUALIZACION).getTime();
     const distancia = fechaLimite - ahora;
 
-    // Renderizar textos básicos de versiones en el banner
     document.getElementById('currentVersion').textContent = `v${MI_VERSION_ACTUAL}`;
     document.getElementById('versionLabel').textContent = `v${VERSION_REQUERIDA}`;
 
-    // Si el usuario ya está desactualizado (su versión es menor a la requerida)
     if (MI_VERSION_ACTUAL !== VERSION_REQUERIDA) {
-      
-      // Mostrar el banner deslizándose desde arriba
       document.getElementById('updateBanner').classList.add('show');
 
-      // Si la cuenta atrás aún no ha expirado, calcular el tiempo restante
       if (distancia > 0) {
         const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
         const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
         const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
 
-        // Actualizar el DOM del reloj con un formato limpio de dos dígitos (00d 00h...)
         document.getElementById('countdown').textContent = 
           `${dias}d ${horas.toString().padStart(2, '0')}h ${minutos.toString().padStart(2, '0')}m ${segundos.toString().padStart(2, '0')}s`;
       } else {
-        // Si el tiempo terminó pero decidiste que no se bloquee la app:
         document.getElementById('countdown').textContent = "¡Tiempo Expirado!";
-        document.getElementById('countdown').style.color = "#ef4444";
-        document.getElementById('countdown').style.borderColor = "#ef4444";
       }
-
     } else {
-      // Si el archivo ya es el más nuevo, ocultar completamente el banner de advertencia
       document.getElementById('updateBanner').classList.remove('show');
     }
   }
 
-  function irADescarga() {
-    window.open('https://drive.google.com/drive/folders/1twMwSrzrgG3zBUtB0J5sguOvKgW-U27z?usp=sharing', '_blank');
-  }
-
-  // Ejecución inmediata al arrancar la app
   actualizarContador();
-  
-  // Refresco en tiempo real estricto: actualiza el contador en pantalla cada 1 segundo (1000ms)
   setInterval(actualizarContador, 1000);
 </script>
 
